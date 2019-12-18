@@ -33,17 +33,21 @@ public class PickerLayoutManager extends LinearLayoutManager {
         if (mItemCount != 0) setAutoMeasureEnabled(false);
     }
 
+    //添加LinearSnapHelper
     @Override
     public void onAttachedToWindow(RecyclerView view) {
         super.onAttachedToWindow(view);
         mLinearSnapHelper.attachToRecyclerView(view);
     }
 
+
+    //没有指定显示条目的数量时，RecyclerView的宽高由自身确定
+    //指定时，根据方向分别计算RecyclerView的宽高
     @Override
     public void onMeasure(@NonNull RecyclerView.Recycler recycler, @NonNull RecyclerView.State state, int widthSpec, int heightSpec) {
 
-        Log.i("wmk","getItemCount():"+getItemCount());
-        Log.i("wmk","state.getItemCount():"+state.getItemCount());
+//        Log.i("wmk","getItemCount():"+getItemCount());
+//        Log.i("wmk","state.getItemCount():"+state.getItemCount());
         if (state.getItemCount() != 0 && mItemCount != 0) {
             View view = recycler.getViewForPosition(0);
             measureChildWithMargins(view, widthSpec, heightSpec);
@@ -51,8 +55,14 @@ public class PickerLayoutManager extends LinearLayoutManager {
             mItemViewWidth = view.getMeasuredWidth();
             mItemViewHeight = view.getMeasuredHeight();
 
-            if (mOrientation == VERTICAL) {
-                int paddingVertical = (mItemCount - 1) / 2 * mItemViewWidth;
+            if (mOrientation == HORIZONTAL) {
+                int paddingHorizontal = (mItemCount - 1) / 2 * mItemViewWidth;
+                mRecyclerView.setClipToPadding(false);
+                mRecyclerView.setPadding(paddingHorizontal, 0, paddingHorizontal, 0);
+                setMeasuredDimension(mItemViewWidth * mItemCount, mItemViewHeight);
+            } else if (mOrientation == VERTICAL) {
+                int paddingVertical = (mItemCount - 1) / 2 * mItemViewHeight;
+                mRecyclerView.setClipToPadding(false);
                 mRecyclerView.setPadding(0, paddingVertical, 0, paddingVertical);
                 setMeasuredDimension(mItemViewWidth, mItemViewHeight * mItemCount);
             }
@@ -64,9 +74,66 @@ public class PickerLayoutManager extends LinearLayoutManager {
     @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         super.onLayoutChildren(recycler, state);
-        if (getItemCount()<0||state.isPreLayout())return;
-        if (mOrientation == VERTICAL){
+        if (getItemCount() < 0 || state.isPreLayout()) return;
+        if (mOrientation == VERTICAL) {
+            scaleVerticalChildView();
+        } else if (mOrientation == HORIZONTAL) {
+            scaleHorizontalChildView();
+        }
+    }
 
+    //停止滑动时触发回调
+    @Override
+    public void onScrollStateChanged(int state) {
+        super.onScrollStateChanged(state);
+        if (state == 0) {
+            if (mOnSelectedViewListener != null && mLinearSnapHelper != null) {
+                View view = mLinearSnapHelper.findSnapView(this);
+                int position = getPosition(view);
+                mOnSelectedViewListener.onSelectedView(view, position);
+            }
+        }
+    }
+
+    @Override
+    public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
+        scaleVerticalChildView();
+        return super.scrollVerticallyBy(dy, recycler, state);
+    }
+
+    @Override
+    public int scrollHorizontallyBy(int dx, RecyclerView.Recycler recycler, RecyclerView.State state) {
+        scaleHorizontalChildView();
+        return super.scrollHorizontallyBy(dx, recycler, state);
+    }
+
+    //竖直方向上的缩放
+    private void scaleVerticalChildView() {
+        float mid = getHeight() / 2f;
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            float childMid = (getDecoratedTop(child) + getDecoratedBottom(child)) / 2f;
+            float scale = 1 + (-1 * (1 - mScale)) * (Math.min(mid, Math.abs(mid - childMid))) / mid;
+            child.setScaleX(scale);
+            child.setScaleY(scale);
+            if (mIsAlpha) {
+                child.setAlpha(scale);
+            }
+        }
+    }
+
+    //横向缩放
+    private void scaleHorizontalChildView() {
+        float mid = getWidth() / 2f;
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            float childMid = (getDecoratedLeft(child) + getDecoratedRight(child)) / 2f;
+            float scale = 1 + (-1 * (1 - mScale)) * (Math.min(mid, Math.abs(mid - childMid))) / mid;
+            child.setScaleX(scale);
+            child.setScaleY(scale);
+            if (mIsAlpha) {
+                child.setAlpha(scale);
+            }
         }
     }
 

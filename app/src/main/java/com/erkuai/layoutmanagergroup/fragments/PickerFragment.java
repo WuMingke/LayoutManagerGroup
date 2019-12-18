@@ -29,7 +29,7 @@ public class PickerFragment extends Fragment implements PickerLayoutManager.OnSe
     private List<String> minuteData = new ArrayList<>();
 
     {
-        for (int i = 1; i <= 24; i++) {
+        for (int i = 0; i <= 23; i++) {
             if (i <= 9) {
                 hourData.add("0" + i);
             } else {
@@ -57,14 +57,17 @@ public class PickerFragment extends Fragment implements PickerLayoutManager.OnSe
 
         hourManager = new PickerLayoutManager(getContext(), recycler_hour, PickerLayoutManager.VERTICAL, false, 3, 0.4f, true);
         recycler_hour.setLayoutManager(hourManager);
-        recycler_hour.setAdapter(new PickAdapter(hourData));
+        recycler_hour.setAdapter(new PickAdapter(hourData, "hour"));
 
         minuteManager = new PickerLayoutManager(getContext(), recycler_minute, PickerLayoutManager.VERTICAL, false, 3, 0.4f, true);
-//        recycler_minute.setLayoutManager(minuteManager);
-//        recycler_minute.setAdapter(new PickAdapter(minuteData));
+        recycler_minute.setLayoutManager(minuteManager);
+        recycler_minute.setAdapter(new PickAdapter(minuteData, "minute"));
 
         hourManager.setOnSelectedViewListener(this);
         minuteManager.setOnSelectedViewListener(this);
+
+//        recycler_hour.scrollToPosition(0);
+//        recycler_minute.scrollToPosition(0);
         return view;
     }
 
@@ -85,9 +88,11 @@ public class PickerFragment extends Fragment implements PickerLayoutManager.OnSe
     class PickAdapter extends RecyclerView.Adapter<PickAdapter.ViewHolder> {
 
         private List<String> data;
+        private String type;
 
-        public PickAdapter(List<String> data) {
+        public PickAdapter(List<String> data, String type) {
             this.data = data;
+            this.type = type;
         }
 
 
@@ -95,7 +100,7 @@ public class PickerFragment extends Fragment implements PickerLayoutManager.OnSe
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.picker_item, parent, false);
-            return new ViewHolder(view);
+            return new ViewHolder(view, type);
         }
 
         @Override
@@ -112,9 +117,17 @@ public class PickerFragment extends Fragment implements PickerLayoutManager.OnSe
 
             TextView textView;
 
-            public ViewHolder(@NonNull View itemView) {
+            public ViewHolder(@NonNull View itemView, String type) {
                 super(itemView);
                 textView = itemView.findViewById(R.id.item_text);
+                switch (type) {
+                    case "hour":
+                        textView.setTag("hour");
+                        break;
+                    case "minute":
+                        textView.setTag("minute");
+                        break;
+                }
             }
         }
     }

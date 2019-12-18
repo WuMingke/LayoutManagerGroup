@@ -49,22 +49,19 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp">
+            android:gravity="center">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_hour"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:tag="hour" />
+                android:layout_weight="1" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_minute"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:tag="minute" />
+                android:layout_weight="1" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
