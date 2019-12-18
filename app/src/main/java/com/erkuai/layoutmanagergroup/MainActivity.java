@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
 
+import com.erkuai.layoutmanagergroup.fragments.EchelonFragment;
 import com.erkuai.layoutmanagergroup.fragments.PickerFragment;
 
 import java.util.ArrayList;
@@ -23,8 +24,9 @@ public class MainActivity extends AppCompatActivity {
         manager = getSupportFragmentManager();
 
         PickerFragment pickerFragment = new PickerFragment();
+        EchelonFragment echelonFragment = new EchelonFragment();
 
-        manager.beginTransaction().add(R.id.layout, pickerFragment).commit();
+        manager.beginTransaction().add(R.id.layout, echelonFragment).commit();
 
     }
 }
